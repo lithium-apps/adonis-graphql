@@ -1,0 +1,9 @@
+{{{
+  exports({ to: app.startPath('graphql.ts') })
+}}}
+import graphql from '@lithium-apps/adonis-graphql/services/main'
+
+graphql.main.resolvers([
+  () => import('#graphql/resolvers/demo_resolver')
+])
+

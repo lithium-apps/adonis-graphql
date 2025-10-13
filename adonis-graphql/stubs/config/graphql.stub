@@ -1,0 +1,16 @@
+{{{
+  exports({ to: app.configPath('graphql.ts') })
+}}}
+import app from '@adonisjs/core/services/app';
+import { defineConfig } from '@lithium-apps/adonis-graphql'
+
+export default defineConfig({
+  main: {
+    path: '/graphql',
+    apollo: {
+      introspection: !app.inProduction,
+      playground: !app.inProduction,
+    },
+    emitSchemaFile: true,
+  }
+})
