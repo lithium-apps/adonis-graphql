@@ -122,7 +122,6 @@ export default class GraphQLServer {
         }
 
         const { apollo, scalarsMap, ...buildSchemaOptions } = this.#config;
-        console.log(this.name, resolvers);
 
         return buildSchema({
             resolvers: resolvers as any,
@@ -132,12 +131,9 @@ export default class GraphQLServer {
                 },
             },
 
-            scalarsMap: [
-                ...baseScalars!,
-                ...(scalarsMap ?? []),
-            ],
-
+            scalarsMap: [...baseScalars!, ...(scalarsMap ?? []),],
             authChecker: authChecker,
+
             ...buildSchemaOptions,
         });
     }

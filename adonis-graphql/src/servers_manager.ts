@@ -1,3 +1,5 @@
+import app from '@adonisjs/core/services/app';
+
 import { glob } from 'glob';
 import { pathToFileURL } from 'node:url';
 import { Logger } from '@adonisjs/core/logger';
@@ -16,13 +18,11 @@ export default class GraphQLServersManager {
     #container: ContainerResolver<ContainerBindings>;
     #logger: Logger;
     #resolvers: Map<string, LazyImport<Function>[]> = new Map();
-    #appRoot: string;
 
-    constructor(config: GraphQLConfig, container: ContainerResolver<ContainerBindings>, logger: Logger, appRoot: string) {
+    constructor(config: GraphQLConfig, container: ContainerResolver<ContainerBindings>, logger: Logger) {
         this.#config = config;
         this.#container = container;
         this.#logger = logger;
-        this.#appRoot = appRoot;
     }
 
     /**
@@ -47,9 +47,11 @@ export default class GraphQLServersManager {
             const server = new GraphQLServer(serverName, serverConfig, this.#container, this.#logger);
             this.#servers.set(serverName, server);
 
-            if (serverConfig.resolverPatterns) {
-                await this.#loadResolversFromPatterns(serverName, serverConfig.resolverPatterns);
-            }
+            console.log(this.#servers);
+
+            // if (serverConfig.resolverPatterns) {
+            //     await this.#loadResolversFromPatterns(serverName, serverConfig.resolverPatterns);
+            // }
         }
     }
 
@@ -59,12 +61,14 @@ export default class GraphQLServersManager {
      * @param patterns {string[]} - An array of glob patterns to load resolver files
      * @private
      */
+    // @ts-ignore
     async #loadResolversFromPatterns(serverName: string, patterns: string[]) {
         const resolvers: LazyImport<Function>[] = [];
+        const appRoot = app.appRoot.pathname;
 
         for (const pattern of patterns) {
             try {
-                const files = await glob(pattern, { absolute: true, cwd: this.#appRoot });
+                const files = await glob(pattern, { absolute: true, cwd: appRoot });
 
                 for (const file of files) {
                     resolvers.push(() => import(pathToFileURL(file).href));
