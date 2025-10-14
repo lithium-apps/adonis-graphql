@@ -1,7 +1,7 @@
 {
   "name": "@lithium-apps/adonis-graphql",
   "description": "Create GraphQL APIs with your Adonis Application.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "engines": {
     "node": ">=20.6.0"
   },
