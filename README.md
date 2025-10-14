@@ -494,7 +494,7 @@ export default defineConfig({
 [issues-url]: https://github.com/lithium-apps/adonis-graphql/issues
 [license-shield]: https://img.shields.io/github/license/lithium-apps/adonis-graphql.svg?style=for-the-badge
 [license-url]: https://github.com/lithium-apps/adonis-graphql/blob/main/LICENSE.md
-[github-build]: https://img.shields.io/github/actions/workflow/status/lithium-apps/adonis-graphql/brp-packages.yaml?branch=main&style=for-the-badge
+[github-build]: https://img.shields.io/github/actions/workflow/status/lithium-apps/adonis-graphql/brp-package.yml?branch=main&style=for-the-badge
 [github-build-url]: https://github.com/lithium-apps/adonis-graphql/actions/workflows/brp-package.yml
 
 [TypeScript]: https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
