@@ -231,13 +231,13 @@ export default defineConfig({
 import graphql from '@lithium-apps/adonis-graphql/services/main'
 
 // Public API resolvers
-await graphql.public.resolvers([
+await graphql.use('public').resolvers([
   () => import('#graphql/public/user_resolver'),
   () => import('#graphql/public/post_resolver'),
 ])
 
 // Admin API resolvers  
-await graphql.admin.resolvers([
+await graphql.use('admin').resolvers([
   () => import('#graphql/admin/admin_resolver'),
   () => import('#graphql/admin/analytics_resolver'),
 ])
@@ -248,7 +248,7 @@ await graphql.admin.resolvers([
 **Basic resolver:**
 
 ```typescript
-import { Resolver, Query, Mutation, Arg } from '@lithium-apps/adonis-graphql'
+import { Resolver, Query, Mutation, Arg } from 'type-graphql'
 
 @Resolver()
 export default class UserResolver {
@@ -268,7 +268,7 @@ export default class UserResolver {
 **With HttpContext:**
 
 ```typescript
-import { Resolver, Query, Ctx } from '@lithium-apps/adonis-graphql'
+import { Resolver, Query, Ctx } from 'type-graphql'
 import type { HttpContext } from '@adonisjs/core/http'
 
 @Resolver()
@@ -286,7 +286,8 @@ export default class UserResolver {
 **Using the CurrentUser decorator:**
 
 ```typescript
-import { Resolver, Query, CurrentUser } from '@lithium-apps/adonis-graphql'
+import { Resolver, Query } from 'type-graphql'
+import { CurrentUser } from '@lithium-apps/adonis-graphql'
 
 @Resolver()
 export default class UserResolver {
@@ -300,11 +301,11 @@ export default class UserResolver {
 **Using authorization with Bouncer:**
 
 ```typescript
-import { Resolver, Query, Authorized } from '@lithium-apps/adonis-graphql'
+import { Resolver, Query, Authorized } from 'type-graphql'
 
 @Resolver()
 export default class AdminResolver {
-  @Authorized(['AdminPolicy.view'])
+  @Authorized(['viewAdminPanel']) // Bouncer ability name
   @Query(() => String)
   adminData(): string {
     return 'Secret admin data'
@@ -323,7 +324,7 @@ export default class AdminResolver {
 **Using VineJS validation:**
 
 ```typescript
-import { Resolver, Mutation, Arg } from '@lithium-apps/adonis-graphql'
+import { Resolver, Mutation, Arg } from 'type-graphql'
 import { validateArgs } from '@lithium-apps/adonis-graphql/decorators/vine/main'
 import vine from '@vinejs/vine'
 
@@ -353,7 +354,7 @@ export default class UserResolver {
 **Using built-in LuxonDateTime scalar:**
 
 ```typescript
-import { Resolver, Query, Field, ObjectType } from '@lithium-apps/adonis-graphql'
+import { Resolver, Query, Field, ObjectType } from 'type-graphql'
 import { DateTime } from 'luxon'
 
 @ObjectType()
@@ -428,6 +429,7 @@ export default defineConfig({
 
 ```typescript
 import { defineConfig } from '@lithium-apps/adonis-graphql'
+import { RedisPubSub } from 'graphql-redis-subscriptions'
 
 export default defineConfig({
   main: {
@@ -435,11 +437,14 @@ export default defineConfig({
     apollo: {
       introspection: true,
       playground: true,
-      // Enable subscriptions
-      subscriptions: {
-        'graphql-ws': true
-      }
     },
+    // Enable subscriptions by providing a PubSub instance
+    pubSub: new RedisPubSub({
+      connection: {
+        host: '127.0.0.1',
+        port: 6379,
+      }
+    }),
     emitSchemaFile: true,
   }
 })

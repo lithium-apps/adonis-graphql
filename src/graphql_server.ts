@@ -47,11 +47,19 @@ export default class GraphQLServer {
     }
 
     /**
+     * Get the configuration path for this server
+     * @returns {string} - The GraphQL endpoint path
+     */
+    public get path(): string {
+        return this.#config.path;
+    }
+
+    /**
      * Set the resolvers for the GraphQL schema
      * @param resolvers {LazyImport<Function>[]} - An array of lazy imports for resolver classes
      */
-    public async setResolvers(resolvers: LazyImport<Function>[]) {
-        this.#resolvers = resolvers;
+    public async resolvers(resolvers: LazyImport<Function>[]) {
+        this.#resolvers = [...resolvers, ...this.#resolvers];
     }
 
     /**
@@ -72,7 +80,12 @@ export default class GraphQLServer {
     public async handle(ctx: HttpContext) {
         const apollo = this.#apollo;
         if (!apollo) {
-            this.#logger.warn(`[${this.name}] Tried to access Apollo Server when not initialized`);
+            this.#logger.error(`[adonis-graphql:${this.name}] Apollo Server is not initialized. Cannot handle request to ${ctx.request.url()}`);
+
+            ctx.response.status(503).send({
+                error: 'GraphQL server is not ready',
+                message: 'The GraphQL server is still initializing. Please try again shortly.'
+            });
             return;
         }
 
@@ -114,11 +127,12 @@ export default class GraphQLServer {
             .filter(Boolean) as Function[];
 
         if (resolvers.length === 0) {
-            throw new Error(
-                `No resolvers found for GraphQL schema. ` +
+            const errorMessage = `No resolvers found for GraphQL schema '${this.name}'. ` +
                 `Make sure your resolver files exist and export a default class decorated with @Resolver(). ` +
-                `Configured patterns: ${JSON.stringify(this.#config.resolverPatterns || [])}`,
-            );
+                `Configured patterns: ${JSON.stringify(this.#config.resolverPatterns || [])}`;
+
+            this.#logger.error(`[adonis-graphql:${this.name}] Failed to build schema - no resolvers found`);
+            throw new Error(errorMessage);
         }
 
         const { apollo, scalarsMap, ...buildSchemaOptions } = this.#config;
@@ -159,7 +173,7 @@ export default class GraphQLServer {
         this.#apollo = apollo;
         await apollo.start();
 
-        this.#logger.info(`[${this.name}] Started GraphQL Apollo Server`);
+        this.#logger.info(`[adonis-graphql:${this.name}] Apollo Server started successfully`);
     }
 
     /**
@@ -178,5 +192,7 @@ export default class GraphQLServer {
         });
 
         useServer({ schema }, ws);
+
+        this.#logger.info(`[adonis-graphql:${this.name}] WebSocket server started for subscriptions`);
     }
 }

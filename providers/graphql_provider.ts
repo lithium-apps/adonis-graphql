@@ -13,16 +13,19 @@ export default class GraphQlProvider {
     constructor(protected app: ApplicationService) {}
 
     register() {
-        console.log('Registering GraphQL provider');
+        // @ts-ignore
         this.app.container.singleton('graphql', async (resolver) => {
             const { default: GraphQLServersManager } = await import('../src/servers_manager.js');
 
+            const appRoot = this.app.appRoot.pathname;
             const logger = await this.app.container.make('logger');
             const config = this.app.config.get<GraphQLConfig>('graphql', null);
 
-            if (!config) logger.error(`GraphQL config missing in ${this.app.configPath('graphql')}`);
+            if (!config) {
+                throw new Error(`GraphQL config missing in ${this.app.configPath('graphql')}`);
+            }
 
-            const manager = new GraphQLServersManager(config, resolver, logger);
+            const manager = new GraphQLServersManager(config, resolver, logger, appRoot);
             await manager.initialize();
 
             return manager;
