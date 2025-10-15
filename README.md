@@ -181,7 +181,7 @@ export default class UserResolver {
 ```typescript
 import graphql from '@lithium-apps/adonis-graphql/services/main'
 
-graphql.main.resolvers([
+graphql.use('main').resolvers([
   () => import('#graphql/resolvers/demo_resolver'),
   () => import('#graphql/resolvers/user_resolver'),
 ])
